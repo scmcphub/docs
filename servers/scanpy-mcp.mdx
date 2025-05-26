@@ -1,0 +1,64 @@
+---
+title: scanpy MCP Server Tools
+sidebarTitle: scanpy-mcp
+icon: computer
+---
+ 
+
+## IO Module 
+
+- `read`: Read data from various sources (10X directory, h5ad files, 10x files, text files)
+- `write`: Save AnnData object to a file
+
+## Preprocessing Module
+
+- `subset_cells`: Filter or subset cells based on total genes expressed counts, number of cells, or values in adata.obs
+- `subset_genes`: Filter or subset genes based on number of cells, counts, or values in adata.var
+- `calculate_qc_metrics`: Calculate quality control metrics (total counts, gene number, mitochondrial genes)
+- `log1p`: Logarithmize the data matrix
+- `normalize_total`: Normalize counts per cell to the same total count
+- `highly_variable_genes`: Annotate highly variable genes in the dataset
+- `regress_out`: Regress out unwanted sources of variation
+- `scale`: Scale the data to unit variance and zero mean
+- `combat`: Perform batch effect correction using ComBat
+- `scrublet`: Detect and remove doublets using Scrublet
+- `neighbors`: Compute a neighborhood graph of observations
+
+## Tools Module
+
+- `tsne`: Perform t-distributed stochastic neighborhood embedding (t-SNE) for visualization
+- `umap`: Perform Uniform Manifold Approximation and Projection (UMAP) for visualization
+- `draw_graph`: Perform force-directed graph drawing
+- `diffmap`: Compute Diffusion Maps for dimensionality reduction
+- `embedding_density`: Calculate the density of cells in an embedding
+- `leiden`: Perform Leiden clustering algorithm for community detection
+- `louvain`: Perform Louvain clustering algorithm for community detection
+- `dendrogram`: Compute hierarchical clustering dendrogram
+- `dpt`: Perform Diffusion Pseudotime (DPT) analysis
+- `paga`: Perform Partition-based graph abstraction
+- `ingest`: Map labels and embeddings from reference to query data
+- `rank_genes_groups`: Rank genes for characterizing groups
+- `filter_rank_genes_groups`: Filter ranked genes groups
+- `marker_gene_overlap`: Compute overlap between marker genes
+- `score_genes`: Score genes based on their expression
+- `score_genes_cell_cycle`: Score genes based on cell cycle phase
+- `pca`: Perform Principal Component Analysis
+
+## Plotting Module 
+
+- `pca`: Create a scatter plot in PCA coordinates
+- `diffmap`: Plot diffusion map embedding of cells
+- `violin`: Create violin plots of one or more variables
+- `stacked_violin`: Create stacked violin plots for compact visualization
+- `heatmap`: Create a heatmap of gene expression values
+- `dotplot`: Create a dot plot of expression values per gene for each group
+- `matrixplot`: Create a heatmap of mean expression values per group
+- `tracksplot`: Create a compact plot of gene expression
+- `scatter`: Create a scatter plot of two variables
+- `embedding`: Create a scatter plot for user-specified embedding basis (e.g., UMAP, t-SNE)
+- `embedding_density`: Plot the density of cells in an embedding
+- `rank_genes_groups`: Plot ranking of genes based on differential expression
+- `rank_genes_groups_dotplot`: Create a dot plot of ranked genes groups
+- `clustermap`: Create a hierarchical clustering heatmap
+- `highly_variable_genes`: Plot highly variable genes
+- `pca_variance_ratio`: Plot PCA variance ratio

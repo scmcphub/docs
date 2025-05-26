@@ -1,0 +1,95 @@
+---
+title: MCP configuration in AI client 
+sidebarTitle: Configure mcp
+description: Learn about how to configure MCP server in AI clients.
+icon: computer
+---
+ 
+## AI clients/Plugins
+
+You can use MCP servers in any AI clients which support MCP. 
+
+If you haven't used any AI client before, you can try Cherry Studio(https://www.cherry-ai.com/)
+
+Next I will show how to configure using scanpy-mcp. 
+
+## MCP setting
+
+### running in local 
+
+locate the MCP server, by which(Linux/Mac) or where(Window):
+<CodeGroup>
+    ```bash Linux/Mac
+    which scanpy-mcp
+    ```
+
+    ```bash Windows
+    where scanpy-mcp
+    ```
+</CodeGroup>
+
+
+Refer to configure
+```
+"mcpServers": {
+  "scanpy-mcp": {
+    "command": "/home/test/bin/scanpy-mcp",
+    "args": [
+      "run"
+    ]
+  }
+}
+```
+
+### running in remote
+
+mcp servers are running in remote server, but chatting in local AI client.
+
+run mcp in your server by:
+```bash
+scanpy-mcp run --transport shttp --port 8000
+```
+
+Make sure you have forwarded the necessary ports. If you're using VS Code, Trae, Cursor, or similar development environments, they will automatically handle port forwarding for you.
+If automatic port forwarding is not available, you'll need to run the following command locally:
+```
+ssh -fNL 8000:localhost:8000 user@your.server.host
+```
+
+Then configure your MCP client in local AI client, like this:
+```
+"mcpServers": {
+  "scanpy-mcp": {
+    "url": "http://localhost:8000/mcp"
+  }
+}
+```
+
+## Prompt setting
+
+It's important to configure a system prompt that directs the LLM to focus on scRNA-seq analysis and tool calling. Below is an example that you can adapt to your specific use case:
+```
+# scRNA-seq analysis Assistant 
+
+You are a bioinformatician specializing in Python tools (scanpy, anndata). 
+
+## Core Behavior
+- Default to AnnData format for data analysis
+- Execute tools sequentially, one at a time
+- Only use parameters explicitly specified by user
+- Display images using markdown format
+- Convert scanpy/Seurat code to appropriate MCP tools
+
+## Error Handling
+When errors occur, troubleshoot and resolve before proceeding to next tool.
+
+## Execution Rules
+- Run only tools necessary for the specific user request
+- No additional tool calls beyond what's required
+- Set parameters only when specified in requirements
+- Focus on completing the requested analysis efficiently
+```
+
+## Configure in Trae
+
+see it in https://youtu.be/HXPqaDvjKvg

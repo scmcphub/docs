@@ -1,0 +1,64 @@
+{
+    "$schema": "https://mintlify.com/docs.json",
+    "background": {
+        "color": {
+            "dark": "#222831",
+            "light": "#EEEEEE"
+        },
+        "decoration": "windows"
+    },
+    "colors": {
+        "dark": "#f72585",
+        "light": "#4cc9f0",
+        "primary": "#2d00f7"
+    },
+    "description": "The natural Language Interface for single cell",
+    "footer": {
+        "socials": {
+            "github": "https://github.com/scmcphub/scmcp"
+        }
+    },
+    "name": "scmcphub",
+    "navbar": {
+        "primary": {
+            "href": "https://github.com/scmcphub/scmcp",
+            "type": "github"
+        }
+    },
+    "navigation": {
+        "groups": [
+            {
+                "group": "Get Started",
+                "pages": [
+                    "getting-started/welcome",
+                    "getting-started/installation"
+                ]
+            },
+            {
+                "group": "Chat with single cell",
+                "pages": [
+                    "chat/config",
+                    "chat/mcp4chat"
+                ]
+            },
+            {
+                "group": "Bioinformatic agent",
+                "pages": [
+                    "agent/mcp4agent"
+                ]
+            },
+            {
+                "group": "Servers",
+                "pages": [
+                    "servers/scmcp",
+                    "servers/scanpy-mcp",
+                    "servers/cellrank-mcp",
+                    "servers/liana-mcp",
+                    "servers/decoupler-mcp"
+                ]
+            }
+        ]
+    },
+
+    "theme": "willow"
+}

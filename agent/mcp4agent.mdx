@@ -1,0 +1,68 @@
+---
+title: Build agent with MCP
+sidebarTitle: bioinformatics agents
+description: Build your own bioinformatics agents
+icon: computer
+---
+
+ 
+## Agent library 
+
+You can use MCP servers in any Agent library which support MCP. 
+
+If you haven't used any AI library before, you can try Agno(https://docs.agno.com/introduction)
+
+Here is an simple example how to build a agent using scanpy-mcp within Agno. 
+
+
+```
+import asyncio
+
+from agno.agent import Agent
+from agno.tools.mcp import MCPTools
+from agno.models.openai.like import OpenAILike
+
+model = OpenAILike(
+        id="qwen-plus",
+        api_key="sk-**",
+        base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
+        extra_query={"enable_thinking": False},
+    )
+
+
+async def run_agent(message: str) -> None:
+    """Run the filesystem agent with the given message."""
+    async with MCPTools(
+            "scanpy-mcp run", timeout_seconds=60,
+    ) as mcp_tools:        
+        agent = Agent(
+            model= model, 
+            tools=[mcp_tools],
+            show_tool_calls=True,
+            debug_mode=True,
+            description="""
+            You are a bioinformatician. You are good at Python bioinformatic tool like scanpy, anndata, pandas.
+            Run tools one by one. 
+             """,
+              monitoring=True
+        )
+        await agent.aprint_response(message, stream=True)
+
+
+
+if __name__ == "__main__":
+
+    asyncio.run(
+        run_agent(
+            "read /data20T/dev/scmcphub/scanpy-mcp/tests/data/hg19; "
+            "then filter cells which gene number < 500; filter genes which express < 3 cells;"
+            "compute qc metrics,include mitochondrial and ribosomal genes, plot total counts, 线粒体百分比，gene number 的小提琴图, 质控图使用multiple_pannel,;"
+            "normalize and Logarithmize the data;"
+            "Identify highly-variable genes; Reduce the dimensionality， 绘制pca_variance_ratio;"
+            "perform cell clustering,设置resolution=0.5， 添加key leiden.0.5, "
+            "and draw UMAP and TSNE scatter plot, color by leiden.0.5, PTPRC, NKG7,KLRD1,GNLY,CST7,PRF1, 每行显示3个图;"
+            )
+        )
+
+
+```

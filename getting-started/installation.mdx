@@ -1,0 +1,92 @@
+---
+title: Installation
+icon: computer
+---
+
+## scmcphub's MCP servers
+
+scmcphub provides a collection of MCP servers for single-cell analysis. These servers enable natural language interaction with various single-cell analysis tools. You can install any of the specialized MCP servers based on your needs.
+
+- **scanpy-mcp**: A comprehensive MCP server for basic single-cell analysis operations, including data preprocessing, dimensionality reduction, clustering, and visualization.  
+
+- **cellrank-mcp**: An MCP server specialized in cell fate analysis and trajectory inference. It enables natural language interaction with CellRank's capabilities for analyzing cell state transitions, fate probabilities, and developmental trajectories.
+
+- **liana-mcp**: A dedicated MCP server for cell-cell communication analysis. It provides natural language interfaces to LIANA's methods for inferring and analyzing cell-cell communication  from single-cell data.
+
+- **decoupler-mcp**: An MCP server focused on pathway and gene set analysis. It enables natural language interaction with decoupler's tools for pathway activity inference and gene set analysis in single-cell data.
+
+- **scmcp**: A unified MCP server that integrates all single-cell analysis capabilities. It provides a comprehensive natural language interface for the entire single-cell analysis workflow, from data preprocessing to advanced analysis, combining the functionalities of all specialized MCP servers into one powerful tool.
+
+## Installation
+
+Install the MCP servers using pip:
+
+```bash
+pip install scmcp
+pip install scanpy-mcp
+pip install cellrank-mcp
+pip install liana-mcp
+pip install decoupler-mcp
+```
+
+For faster installation, use `uv`:
+
+```bash
+uv pip install scmcp scanpy-mcp cellrank-mcp liana-mcp decoupler-mcp
+```
+
+## Verify Installation
+
+To verify that the MCP servers are installed correctly, you can run the following commands in your terminal:
+
+```bash
+# Verify scmcp installation
+scmcp run
+
+# Verify scanpy-mcp installation
+scanpy-mcp run
+
+# Verify cellrank-mcp installation
+cellrank-mcp run
+
+# Verify liana-mcp installation
+liana-mcp run
+
+# Verify decoupler-mcp installation
+decoupler-mcp run
+```
+
+Each command will start the respective MCP server, and you should see output indicating that the server is running.  
+
+## Finding MCP Server Executables
+
+If you need to locate the MCP server executables on your system:
+
+```bash
+# On Linux/Mac
+which scmcp
+which scanpy-mcp
+which cellrank-mcp
+which liana-mcp
+which decoupler-mcp
+
+# On Windows (PowerShell)
+Get-Command scmcp
+Get-Command scanpy-mcp
+Get-Command cellrank-mcp
+Get-Command liana-mcp
+Get-Command decoupler-mcp
+
+# On Windows (Command Prompt)
+where scmcp
+where scanpy-mcp
+where cellrank-mcp
+where liana-mcp
+where decoupler-mcp
+```
+
+## Using with AI Clients
+
+<icon name="message-circle" />
+
+You can use these MCP servers with any AI client that supports the MCP protocol. For a user-friendly experience, we recommend [Cherry Studio](https://www.cherry-ai.com/).  

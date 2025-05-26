@@ -1,0 +1,22 @@
+---
+title: cellrank MCP Server Tools
+sidebarTitle: cellrank-mcp
+icon: computer
+---
+
+## Kernel Module
+
+- `create_kernel`: Create a CellRank kernel based on the specified type (pseudotime, cytotrace, velocity, connectivity, realtime)
+- `compute_transition_matrix`: Compute transition matrix for a specified kernel using appropriate parameters
+
+## Estimator Module
+
+- `create_and_fit_gpcca`: Create and fit a Generalized Perron Cluster Cluster Analysis (GPCCA) estimator to compute macrostates
+- `predict_terminal_states`: Predict terminal states from macrostates
+- `predict_initial_states`: Compute initial states from macrostates using coarse stationary distribution
+- `compute_fate_probabilities`: Compute fate probabilities for cells based on terminal states
+
+## Plotting Module
+
+- `kernel_projection`: Plot transition matrix as a stream or grid plot for a specified kernel
+- `circular_projection`: Visualize fate probabilities in a circular embedding 
