@@ -1,0 +1,38 @@
+---
+title: infercnv MCP Server Tools
+sidebarTitle: infercnv-mcp
+icon: computer
+---
+
+## Core Analysis Module
+
+- `infercnv`: Perform Copy Number Variation (CNV) analysis by averaging gene expression over genomic regions
+- `cnv_score`: Calculate CNV scores for individual cells to quantify copy number variation
+
+## Dimensionality Reduction Module
+
+- `pca`: Perform Principal Component Analysis on CNV data with default parameters optimized for CNV analysis
+- `tsne`: Generate t-SNE visualization of CNV data using CNV-specific neighborhood information
+- `umap`: Create UMAP projection of CNV data utilizing CNV-specific neighborhood relationships
+
+## Clustering Module
+
+- `leiden`: Perform Leiden clustering on CNV data using CNV-specific neighborhood information
+- `louvain`: Apply Louvain clustering algorithm to CNV data using CNV-specific neighborhood relationships
+
+## Data Requirements
+
+The input AnnData object must contain the following columns in `adata.var`:
+- `chromosome`: Chromosomal location of genes
+- `start`: Start position of genes
+- `end`: End position of genes
+
+These columns can be added using the `load_gene_position` function before running CNV analysis.
+
+## Output
+
+The analysis generates two main outputs:
+1. CNV scores stored in the original AnnData object
+2. A separate CNV-specific AnnData object containing the CNV analysis results
+
+All visualizations and clustering results are stored with CNV-specific keys (e.g., `cnv_pca`, `cnv_umap`, `cnv_leiden`) to distinguish them from other analyses.

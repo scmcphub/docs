@@ -15,6 +15,8 @@ scmcphub provides a collection of MCP servers for single-cell analysis. These se
 
 - **decoupler-mcp**: An MCP server focused on pathway and gene set analysis. It enables natural language interaction with decoupler's tools for pathway activity inference and gene set analysis in single-cell data.
 
+- **infercnv-mcp**: An MCP server focused on CNV analysis. It enables natural language interaction with infercnvpy's tools for CNV analysis in single-cell data.
+
 - **scmcp**: A unified MCP server that integrates all single-cell analysis capabilities. It provides a comprehensive natural language interface for the entire single-cell analysis workflow, from data preprocessing to advanced analysis, combining the functionalities of all specialized MCP servers into one powerful tool.
 
 ## Installation
@@ -27,12 +29,13 @@ pip install scanpy-mcp
 pip install cellrank-mcp
 pip install liana-mcp
 pip install decoupler-mcp
+pip install infercnv-mcp
 ```
 
 For faster installation, use `uv`:
 
 ```bash
-uv pip install scmcp scanpy-mcp cellrank-mcp liana-mcp decoupler-mcp
+uv pip install scmcp scanpy-mcp cellrank-mcp liana-mcp decoupler-mcp infercnv-mcp
 ```
 
 ## Verify Installation
@@ -55,6 +58,9 @@ liana-mcp run
 # Verify decoupler-mcp installation
 decoupler-mcp run
 ```
+# Verify infercnv-mcp installation
+infercnv-mcp run
+```
 
 Each command will start the respective MCP server, and you should see output indicating that the server is running.  
 
@@ -69,6 +75,7 @@ which scanpy-mcp
 which cellrank-mcp
 which liana-mcp
 which decoupler-mcp
+which infercnv-mcp
 
 # On Windows (PowerShell)
 Get-Command scmcp
@@ -76,6 +83,7 @@ Get-Command scanpy-mcp
 Get-Command cellrank-mcp
 Get-Command liana-mcp
 Get-Command decoupler-mcp
+Get-Command infercnv-mcp
 
 # On Windows (Command Prompt)
 where scmcp
@@ -83,10 +91,5 @@ where scanpy-mcp
 where cellrank-mcp
 where liana-mcp
 where decoupler-mcp
+where infercnv-mcp
 ```
-
-## Using with AI Clients
-
-<icon name="message-circle" />
-
-You can use these MCP servers with any AI client that supports the MCP protocol. For a user-friendly experience, we recommend [Cherry Studio](https://www.cherry-ai.com/).  
