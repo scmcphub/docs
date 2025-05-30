@@ -1,0 +1,68 @@
+---
+title: 使用 MCP 构建 agent
+sidebarTitle: bioinformatics agents
+description: 构建你自己的生物信息学 agents
+icon: computer
+---
+
+ 
+## Agent 库
+
+你可以在任何支持 MCP 的 Agent 库中使用 MCP 服务器。
+
+如果你之前没有使用过任何 AI 库，你可以尝试 Agno(https://docs.agno.com/introduction)
+
+这里是一个使用 scanpy-mcp 在 Agno 中构建 agent 的简单示例。
+
+
+```
+import asyncio
+
+from agno.agent import Agent
+from agno.tools.mcp import MCPTools
+from agno.models.openai.like import OpenAILike
+
+model = OpenAILike(
+        id="qwen-plus",
+        api_key="sk-**",
+        base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
+        extra_query={"enable_thinking": False},
+    )
+
+
+async def run_agent(message: str) -> None:
+    """使用给定的消息运行文件系统 agent。"""
+    async with MCPTools(
+            "scanpy-mcp run", timeout_seconds=60,
+    ) as mcp_tools:        
+        agent = Agent(
+            model= model, 
+            tools=[mcp_tools],
+            show_tool_calls=True,
+            debug_mode=True,
+            description="""
+            你是一个生物信息学家。你擅长使用 Python 生物信息学工具，如 scanpy、anndata、pandas。
+            请逐个运行工具。
+             """,
+              monitoring=True
+        )
+        await agent.aprint_response(message, stream=True)
+
+
+
+if __name__ == "__main__":
+
+    asyncio.run(
+        run_agent(
+            "read /data20T/dev/scmcphub/scanpy-mcp/tests/data/hg19; "
+            "then filter cells which gene number < 500; filter genes which express < 3 cells;"
+            "compute qc metrics,include mitochondrial and ribosomal genes, plot total counts, 线粒体百分比，gene number 的小提琴图, 质控图使用multiple_pannel,;"
+            "normalize and Logarithmize the data;"
+            "Identify highly-variable genes; Reduce the dimensionality， 绘制pca_variance_ratio;"
+            "perform cell clustering,设置resolution=0.5， 添加key leiden.0.5, "
+            "and draw UMAP and TSNE scatter plot, color by leiden.0.5, PTPRC, NKG7,KLRD1,GNLY,CST7,PRF1, 每行显示3个图;"
+            )
+        )
+
+
+```

@@ -1,0 +1,95 @@
+---
+title: 安装
+icon: computer
+---
+
+## scmcphub 的 MCP 服务器
+
+scmcphub 提供了一系列用于单细胞分析的 MCP 服务器。这些服务器使您能够使用自然语言与各种单细胞分析工具进行交互。您可以根据需要安装任何专门的 MCP 服务器。
+
+- **scanpy-mcp**：一个全面的 MCP 服务器，用于基本的单细胞分析操作，包括数据预处理、降维、聚类和可视化。
+
+- **cellrank-mcp**：一个专门用于细胞命运分析和轨迹推断的 MCP 服务器。它使您能够使用自然语言与 CellRank 的功能进行交互，用于分析细胞状态转换、命运概率和发育轨迹。
+
+- **liana-mcp**：一个专门用于细胞间通讯分析的 MCP 服务器。它提供了与 LIANA 方法的自然语言接口，用于从单细胞数据中推断和分析细胞间通讯。
+
+- **decoupler-mcp**：一个专注于通路和基因集分析的 MCP 服务器。它使您能够使用自然语言与 decoupler 的工具进行交互，用于单细胞数据中的通路活性推断和基因集分析。
+
+- **infercnv-mcp**：一个专注于 CNV 分析的 MCP 服务器。它使您能够使用自然语言与 infercnvpy 的工具进行交互，用于单细胞数据中的 CNV 分析。
+
+- **scmcp**：一个统一的 MCP 服务器，集成了所有单细胞分析功能。它为整个单细胞分析工作流程提供了全面的自然语言接口，从数据预处理到高级分析，将所有专门的 MCP 服务器的功能整合到一个强大的工具中。
+
+## 安装
+
+使用 pip 安装 MCP 服务器：
+
+```bash
+pip install scmcp
+pip install scanpy-mcp
+pip install cellrank-mcp
+pip install liana-mcp
+pip install decoupler-mcp
+pip install infercnv-mcp
+```
+
+为了更快地安装，使用 `uv`：
+
+```bash
+uv pip install scmcp scanpy-mcp cellrank-mcp liana-mcp decoupler-mcp infercnv-mcp
+```
+
+## 验证安装
+
+要验证 MCP 服务器是否正确安装，您可以在终端中运行以下命令：
+
+```bash
+# 验证 scmcp 安装
+scmcp run
+
+# 验证 scanpy-mcp 安装
+scanpy-mcp run
+
+# 验证 cellrank-mcp 安装
+cellrank-mcp run
+
+# 验证 liana-mcp 安装
+liana-mcp run
+
+# 验证 decoupler-mcp 安装
+decoupler-mcp run
+
+# 验证 infercnv-mcp 安装
+infercnv-mcp run
+```
+
+每个命令都会启动相应的 MCP 服务器，您应该能看到表明服务器正在运行的输出。
+
+## 查找 MCP 服务器可执行文件
+
+如果您需要在系统中定位 MCP 服务器可执行文件：
+
+```bash
+# 在 Linux/Mac 上
+which scmcp
+which scanpy-mcp
+which cellrank-mcp
+which liana-mcp
+which decoupler-mcp
+which infercnv-mcp
+
+# 在 Windows (PowerShell) 上
+Get-Command scmcp
+Get-Command scanpy-mcp
+Get-Command cellrank-mcp
+Get-Command liana-mcp
+Get-Command decoupler-mcp
+Get-Command infercnv-mcp
+
+# 在 Windows (命令提示符) 上
+where scmcp
+where scanpy-mcp
+where cellrank-mcp
+where liana-mcp
+where decoupler-mcp
+where infercnv-mcp
+```

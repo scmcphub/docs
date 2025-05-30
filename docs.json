@@ -26,38 +26,79 @@
         }
     },
     "navigation": {
-        "groups": [
+        "languages": [
             {
-                "group": "Get Started",
-                "pages": [
-                    "getting-started/welcome",
-                    "getting-started/installation"
+                "language": "en",
+                "groups": [
+                    {
+                        "group": "Get Started",
+                        "pages": [
+                            "getting-started/welcome",
+                            "getting-started/installation"
+                        ]
+                    },
+                    {
+                        "group": "Chat with single cell",
+                        "pages": [
+                            "chat/config",
+                            "chat/mcp4chat"
+                        ]
+                    },
+                    {
+                        "group": "Bioinformatic agent",
+                        "pages": [
+                            "agent/mcp4agent"
+                        ]
+                    },
+                    {
+                        "group": "Servers",
+                        "pages": [
+                            "servers/scmcp",
+                            "servers/scanpy-mcp",
+                            "servers/cellrank-mcp",
+                            "servers/liana-mcp",
+                            "servers/decoupler-mcp"
+                        ]
+                    }
                 ]
             },
             {
-                "group": "Chat with single cell",
-                "pages": [
-                    "chat/config",
-                    "chat/mcp4chat"
-                ]
-            },
-            {
-                "group": "Bioinformatic agent",
-                "pages": [
-                    "agent/mcp4agent"
-                ]
-            },
-            {
-                "group": "Servers",
-                "pages": [
-                    "servers/scmcp",
-                    "servers/scanpy-mcp",
-                    "servers/cellrank-mcp",
-                    "servers/liana-mcp",
-                    "servers/decoupler-mcp"
+                "language": "cn",
+                "groups": [
+                    {
+                        "group": "Get Started",
+                        "pages": [
+                            "getting-started/welcome_cn",
+                            "getting-started/installation_cn"
+                        ]
+                    },
+                    {
+                        "group": "Chat with single cell",
+                        "pages": [
+                            "chat/config_cn",
+                            "chat/mcp4chat_cn"
+                        ]
+                    },
+                    {
+                        "group": "Bioinformatic agent",
+                        "pages": [
+                            "agent/mcp4agent_cn"
+                        ]
+                    },
+                    {
+                        "group": "Servers",
+                        "pages": [
+                            "servers/scmcp",
+                            "servers/scanpy-mcp",
+                            "servers/cellrank-mcp",
+                            "servers/liana-mcp",
+                            "servers/decoupler-mcp"
+                        ]
+                    }
                 ]
             }
-        ]
+        ]   
+
     },
 
     "theme": "willow"

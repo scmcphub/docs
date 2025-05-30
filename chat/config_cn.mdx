@@ -1,0 +1,95 @@
+---
+title: AI 客戶端中的 MCP 配置
+sidebarTitle: Configure mcp
+description: 了解如何在 AI 客戶端中配置 MCP 伺服器。
+icon: computer
+---
+ 
+## AI 客戶端/插件
+
+您可以在任何支援 MCP 的 AI 客戶端中使用 MCP 伺服器。
+
+如果您之前沒有使用過任何 AI 客戶端，您可以嘗試 Cherry Studio(https://www.cherry-ai.com/)
+
+接下來我將展示如何使用 scanpy-mcp 進行配置。
+
+## MCP 設置
+
+### 本地運行
+
+通過 which(Linux/Mac) 或 where(Windows) 定位 MCP 伺服器：
+<CodeGroup>
+    ```bash Linux/Mac
+    which scanpy-mcp
+    ```
+
+    ```bash Windows
+    where scanpy-mcp
+    ```
+</CodeGroup>
+
+
+參考配置
+```
+"mcpServers": {
+  "scanpy-mcp": {
+    "command": "/home/test/bin/scanpy-mcp",
+    "args": [
+      "run"
+    ]
+  }
+}
+```
+
+### 遠程運行
+
+MCP 伺服器在遠程伺服器上運行，但在本地 AI 客戶端中進行對話。
+
+在伺服器上運行 mcp：
+```bash
+scanpy-mcp run --transport shttp --port 8000
+```
+
+確保您已經轉發了必要的端口。如果您使用 VS Code、Trae、Cursor 或類似的開發環境，它們會自動為您處理端口轉發。
+如果沒有自動端口轉發，您需要在本地運行以下命令：
+```
+ssh -fNL 8000:localhost:8000 user@your.server.host
+```
+
+然後在本地 AI 客戶端中配置您的 MCP 客戶端，如下所示：
+```
+"mcpServers": {
+  "scanpy-mcp": {
+    "url": "http://localhost:8000/mcp"
+  }
+}
+```
+
+## Prompt 設置
+
+配置一個系統提示詞來引導 LLM 專注於 scRNA-seq 分析和工具調用是很重要的。以下是一個範例，您可以根據具體使用場景進行調整：
+```
+# scRNA-seq 分析助手
+
+您是一位專門使用 Python 工具（scanpy、anndata）的生物資訊學家。
+
+## 核心行為
+- 預設使用 AnnData 格式進行數據分析
+- 按順序執行工具，一次一個
+- 僅使用用戶明確指定的參數
+- 使用 markdown 格式顯示圖像
+- 將 scanpy/Seurat 代碼轉換為適當的 MCP 工具
+
+## 錯誤處理
+當發生錯誤時，在繼續下一個工具之前進行故障排除和解決。
+
+## 執行規則
+- 僅運行用戶特定請求所需的工具
+- 不進行超出必要範圍的額外工具調用
+- 僅在需求中指定時設置參數
+- 專注於高效完成請求的分析
+```
+
+## 在 Trae 中配置
+
+查看 https://youtu.be/HXPqaDvjKvg
