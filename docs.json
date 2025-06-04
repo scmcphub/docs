@@ -12,6 +12,10 @@
         "light": "#4cc9f0",
         "primary": "#2d00f7"
     },
+    "favicon": {
+        "dark": "/assets/favicon.ico",
+        "light": "/assets/favicon.ico"
+    },
     "description": "The natural Language Interface for single cell",
     "footer": {
         "socials": {
