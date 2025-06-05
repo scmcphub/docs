@@ -61,7 +61,8 @@
                             "servers/scanpy-mcp",
                             "servers/cellrank-mcp",
                             "servers/liana-mcp",
-                            "servers/decoupler-mcp"
+                            "servers/decoupler-mcp",
+                            "servers/infercnv-mcp"
                         ]
                     }
                 ]
@@ -96,7 +97,8 @@
                             "servers/scanpy-mcp",
                             "servers/cellrank-mcp",
                             "servers/liana-mcp",
-                            "servers/decoupler-mcp"
+                            "servers/decoupler-mcp",
+                            "servers/infercnv-mcp"
                         ]
                     }
                 ]
