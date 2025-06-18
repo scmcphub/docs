@@ -55,6 +55,12 @@
                         ]
                     },
                     {
+                        "group": "Intelligent Tool Selection",
+                        "pages": [
+                            "auto/auto.mdx"
+                        ]
+                    },
+                    {
                         "group": "Servers",
                         "pages": [
                             "servers/scmcp",
@@ -88,6 +94,12 @@
                         "group": "Bioinformatic agent",
                         "pages": [
                             "agent/mcp4agent_cn"
+                        ]
+                    },
+                    {
+                        "group": "Intelligent Tool Selection",
+                        "pages": [
+                            "auto/auto.mdx"
                         ]
                     },
                     {
