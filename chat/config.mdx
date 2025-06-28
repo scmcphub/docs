@@ -35,7 +35,7 @@ Refer to configure
   "scanpy-mcp": {
     "command": "/home/test/bin/scanpy-mcp",
     "args": [
-      "run"
+       "run", "--run-mode", "code"
     ]
   }
 }
@@ -47,7 +47,7 @@ mcp servers are running in remote server, but chatting in local AI client.
 
 run mcp in your server by:
 ```bash
-scanpy-mcp run --transport shttp --port 8000
+scanpy-mcp run --transport shttp --port 8000 --run-mode tool
 ```
 
 Make sure you have forwarded the necessary ports. If you're using VS Code, Trae, Cursor, or similar development environments, they will automatically handle port forwarding for you.

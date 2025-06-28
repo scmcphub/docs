@@ -1,0 +1,83 @@
+---
+title: "Run Mode"
+description: "Two scmcphub run modes for different use cases"
+
+---
+
+# Run Mode
+
+scmcphub provides two distinct run modes to accommodate different user needs and preferences.
+
+## Tool Mode
+
+In tool mode, scmcphub provides a curated set of predefined functions that the LLM can select and execute.
+
+**Advantages:**
+- **Stable**: Predefined functions ensure consistent and reliable execution
+- **Predictable**: Known behavior and expected outputs
+- **Safe**: Controlled environment with validated operations
+
+**Disadvantages:**
+- **Limited flexibility**: Restricted to available predefined functions， you should define new tools when you need customization functions
+
+### Usage
+Running in terminal
+```bash
+scmcp run --run-mode tool
+```
+
+Below are some examples:
+- https://youtu.be/VM7G-VMNhOs
+- https://youtu.be/D669c0EyNzE
+- https://youtu.be/b45_6fJXEIQ
+
+Configure mcp
+```json
+{
+  "mcpServers": {
+    "scmcp": {
+      "command": "/home/test/bin/scmcp",
+      "args": [
+         "run", "--run-mode", "tool"
+      ]
+    }
+  }
+}
+```
+
+## Code Mode
+
+In code mode, scmcphub provides a Jupyter backend that allows the LLM to generate and execute custom code.
+
+The mode is based on the project https://github.com/huang-sh/abcoder
+
+**Advantages:**
+- **Highly flexible**: Can create custom workflows and combine operations freely
+- **Extensible**: Supports any Python code and external libraries
+- **Interactive**: Real-time code execution and debugging capabilities
+
+**Disadvantages:**
+- **Less stable**: Code generation is different for each time
+
+### Usage
+Running in terminal
+```bash
+scmcp run --run-mode code
+```
+
+Configure mcp
+```json
+{
+  "mcpServers": {
+    "scmcp": {
+      "command": "/home/test/bin/scmcp",
+      "args": [
+         "run", "--run-mode", "code"
+      ]
+    }
+  }
+}
+```
+
+Below are some examples:
+https://youtu.be/3jtXIeapslI

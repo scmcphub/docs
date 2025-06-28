@@ -1,0 +1,84 @@
+---
+title: "运行模式"
+description: "scmcphub 的两种运行模式，适用于不同使用场景"
+
+---
+
+# 运行模式
+
+scmcphub 提供两种不同的运行模式，以满足不同用户的需求和偏好。
+
+## 工具模式
+
+在工具模式下，scmcphub 提供一套精选的预定义函数，供 LLM 选择和执行。
+
+**优势：**
+- **稳定可靠**：预定义函数确保一致且可靠的执行
+- **可预测**：已知的行为和预期输出
+- **安全**：受控环境，经过验证的操作
+
+**劣势：**
+- **灵活性有限**：仅限于可用的预定义函数，需要自定义功能时应定义新工具
+
+### 使用方法
+在终端中运行
+```
+scmcp run --run-mode tool
+```
+
+以下是一些示例：
+- https://youtu.be/VM7G-VMNhOs
+- https://youtu.be/D669c0EyNzE
+- https://youtu.be/b45_6fJXEIQ
+
+配置 mcp
+```
+"mcpServers": {
+  "scmcp": {
+    "command": "/home/test/bin/scmcp",
+    "args": [
+       "run", "--run-mode", "tool"
+    ]
+  }
+}
+```
+
+## 代码模式
+
+在代码模式下，scmcphub 提供 Jupyter 后端，允许 LLM 生成和执行自定义代码。
+
+该模式基于项目 https://github.com/huang-sh/abcoder
+
+**优势：**
+- **高度灵活**：可以自由创建自定义工作流程并组合操作
+- **可扩展**：支持任何 Python 代码和外部库
+- **交互式**：实时代码执行和调试功能
+
+**劣势：**
+- **稳定性较低**：代码生成每次可能不同
+
+### 使用方法
+在终端中运行
+```
+scmcp run --run-mode code
+```
+
+配置 mcp
+```
+"mcpServers": {
+  "scmcp": {
+    "command": "/home/test/bin/scmcp",
+    "args": [
+       "run", "--run-mode", "code"
+    ]
+  }
+}
+```
+
+以下是一些示例：
+https://youtu.be/3jtXIeapslI
+
+## 选择合适的模式
+
+- 当您需要可靠、可重复的操作和预定义函数时，使用**工具模式**
+- 当您需要自定义工作流程或尝试新方法时，使用**代码模式**

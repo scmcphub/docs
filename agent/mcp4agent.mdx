@@ -33,7 +33,7 @@ model = OpenAILike(
 async def run_agent(message: str) -> None:
     """Run the filesystem agent with the given message."""
     async with MCPTools(
-            "scanpy-mcp run", timeout_seconds=60,
+            "scanpy-mcp run --run-mode tool", timeout_seconds=60,
     ) as mcp_tools:        
         agent = Agent(
             model= model, 

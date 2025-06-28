@@ -1,0 +1,258 @@
+---
+title: "Tool Mode"
+description: "Tool Mode development guide"
+
+---
+
+# Tool Mode Development Guide
+
+This guide demonstrates how to develop an MCP (Model Context Protocol) based scmcphub API using Tool Mode. Tool Mode allows you to create custom tools that can be integrated into the scmcphub ecosystem for single-cell analysis workflows.
+
+## Overview
+
+- Provide standardized interfaces for data processing
+- Build reusable components for the scmcphub community
+
+## What We'll Build
+
+We'll create a simple demo that demonstrates the basic structure of an MCP tool. This demo will:
+- Query data from `adata.uns` (unstructured data storage in AnnData)
+- List available keys in the unstructured data
+- Follow scmcphub conventions and best practices
+
+
+## Project Setup
+
+### 1. Install UV Package Manager
+
+UV is a fast Python package installer and resolver. It's recommended for scmcphub development:
+
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+### 2. Initialize the Project
+
+Create a new MCP project using UV:
+
+```bash
+uv init --package mcp-demo
+```
+
+This creates a basic Python package structure with the following layout:
+
+```
+mcp-demo/
+├── README.md
+├── pyproject.toml
+└── src
+    └── mcp_demo
+        └── __init__.py
+
+2 directories, 3 files
+```
+
+### 3. Create Required Files
+
+We need to create three main files for our MCP tool:
+
+```bash
+# Schema definitions for tool parameters
+touch mcp-demo/src/mcp_demo/schema.py
+
+# MCP server implementation and tool definitions
+touch mcp-demo/src/mcp_demo/server.py
+
+# Command-line interface
+touch mcp-demo/src/mcp_demo/cli.py
+```
+
+## Implementation Details
+
+### 1. Schema Definition (`schema.py`)
+
+The schema file defines the input parameters for your tools using Pydantic models. This ensures type safety and provides automatic validation:
+
+```python
+from pydantic import Field, BaseModel
+
+class UNSKeyParam(BaseModel):
+    """Input schema for the uns_key tool."""
+    key: str = Field(..., description="Key in adata.uns")
+    
+```
+
+**Key Points:**
+- `Field(...)` indicates this is a required parameter
+- The `description` provides documentation for the tool
+- Pydantic automatically validates the input type
+
+### 2. Server Implementation (`server.py`)
+
+The server file contains the core logic of your MCP tools. Here's a detailed breakdown:
+
+```python
+"""
+Server implementation for mcp-demo.
+
+This module defines the MCP tools that can be used to interact with AnnData objects.
+Each tool is decorated with @mcp.tool() and follows the scmcphub conventions.
+"""
+from fastmcp import FastMCP, Context
+from fastmcp.exceptions import ToolError
+from scmcp_shared.schema import AdataInfo
+from scmcp_shared.util import get_ads
+from scanpy_mcp.server import ScanpyMCPManager
+from scmcp_shared.backend import AdataManager  
+
+# Import the schema we defined
+from .schema import UNSKeyParam
+
+# Create MCP instance using FastMCP
+# mcp = FastMCP("mcp-demo")
+## if you want to add this  tool in scanpy-mcp, you can use this
+
+mcp = ScanpyMCPManager(name="mcp-demo", backend=AdataManager).mcp
+
+
+@mcp.tool()
+def uns_key(
+    request: UNSKeyParam,
+    adinfo: AdataInfo = AdataInfo()
+):
+    """
+    Get value from adata.uns with specified key.
+    """
+    try:
+        # Get the AnnData object manager
+        ads = get_ads()
+        adata = ads.get_adata(adinfo=adinfo)
+        
+        # Validate that the key exists
+        if request.key not in adata.uns:
+            raise ToolError(f"Key '{request.key}' not found in adata.uns")
+        
+        # Retrieve the value
+        result = adata.uns[request.key]
+        
+        # Log the operation for tracking and debugging
+        add_op_log(adata, "uns_key", {"key": request.key}, adinfo)
+        
+        # Return structured response
+        return {
+            "key": request.key,
+            "value": str(result),
+            "type": type(result).__name__
+        }
+    except ToolError as e:
+        # Re-raise tool errors as-is
+        raise ToolError(str(e))
+    except Exception as e:
+        # Handle unexpected errors
+        raise ToolError(f"Unexpected error: {e}")
+
+
+@mcp.tool()
+def list_uns_keys(
+    adinfo: AdataInfo = AdataInfo()
+):
+    """
+    List all available keys in adata.uns.
+    """
+    try:
+        ads = get_ads()
+        adata = ads.get_adata(adinfo=adinfo)
+        keys = list(adata.uns.keys())
+        
+        return {
+            "keys": keys,
+            "count": len(keys)
+        }
+    except Exception as e:
+        logger.error(f"Error in list_uns_keys: {e}")
+        raise ToolError(f"Unexpected error: {e}")
+```
+
+**Important Concepts:**
+
+1. **FastMCP**: The framework that provides the MCP functionality
+2. **ToolError**: Custom exception for tool-specific errors
+3. **AdataInfo**: Standard parameter for specifying which AnnData object to use
+4. **get_ads()**: Utility function to access the AnnData manager
+
+### 3. CLI Implementation (`cli.py`)
+
+The CLI file provides a command-line interface for your MCP tools:
+
+```python
+"""
+Command-line interface for mcp-demo.
+
+This module provides a CLI entry point for the mcp-demo package.
+The CLI allows users to run the MCP server and access the tools
+through command-line arguments.
+"""
+
+from scmcp_shared.cli import MCPCLI
+from .server import mcp
+
+# Create CLI instance using the shared CLI framework
+cli = MCPCLI(
+    name="mcp-demo", 
+    help_text="MCP Demo Server CLI - A simple example of MCP tool development",
+    mcp=mcp
+)
+```
+
+**Benefits of using MCPCLI:**
+- Standardized CLI interface across all scmcphub tools
+- Built-in help and documentation
+- Consistent command-line argument handling
+- Integration with the broader scmcphub ecosystem
+
+### 4. Package Configuration (`pyproject.toml`)
+
+Update the project configuration to include all necessary dependencies:
+
+```toml
+[project]
+name = "mcp-demo"
+version = "0.1.0"
+description = "A simple MCP demo for scmcphub - demonstrates basic tool development"
+authors = [
+    {name = "Your Name", email = "your.email@example.com"},
+]
+dependencies = [
+    "scmcp-shared>=0.1.0",   # Shared utilities and schemas
+    "scanpy-mcp"
+]
+requires-python = ">=3.8"
+
+[project.scripts]
+mcp-demo = "mcp_demo.cli:cli.run"  # CLI entry point
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+```
+
+## Running the Demo
+
+### 1. Install in Development Mode
+
+Install your package in development mode to enable live code changes:
+
+```bash
+cd mcp-demo
+uv pip install -e .
+```
+
+### 2. Test the CLI
+
+Run the MCP server in tool mode:
+
+```bash
+mcp-demo run --run-mode tool
+```
+
+This starts the server and makes your tools available for use.

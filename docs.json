@@ -38,7 +38,8 @@
                         "group": "Get Started",
                         "pages": [
                             "getting-started/welcome",
-                            "getting-started/installation"
+                            "getting-started/installation",
+                            "getting-started/run-mode"
                         ]
                     },
                     {
@@ -61,6 +62,13 @@
                         ]
                     },
                     {
+                        "group": "Development Guide",
+                        "pages": [
+                            "dev-guide/tool-mode",
+                            "dev-guide/code-mode"
+                        ]
+                    },
+                    {
                         "group": "Servers",
                         "pages": [
                             "servers/scmcp",
@@ -80,7 +88,8 @@
                         "group": "Get Started",
                         "pages": [
                             "getting-started/welcome_cn",
-                            "getting-started/installation_cn"
+                            "getting-started/installation_cn",
+                            "getting-started/run-mode_cn"
                         ]
                     },
                     {
@@ -100,6 +109,13 @@
                         "group": "Intelligent Tool Selection",
                         "pages": [
                             "auto/auto"
+                        ]
+                    },
+                    {
+                        "group": "Development Guide",
+                        "pages": [
+                            "dev-guide/tool-mode_cn",
+                            "dev-guide/code-mode_cn"
                         ]
                     },
                     {
