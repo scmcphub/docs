@@ -1,0 +1,282 @@
+---
+title: "BaseMCPManager Reference"
+description: "Complete reference documentation for BaseMCPManager class"
+---
+
+# BaseMCPManager Reference
+
+The `BaseMCPManager` is the foundational class for creating MCP (Model Context Protocol) servers in the scmcphub ecosystem. It provides a standardized way to manage and organize multiple MCP modules, with built-in filtering capabilities for both modules and tools.
+
+## Overview
+
+`BaseMCPManager` serves as an abstract base class that handles:
+- Module registration and management
+- Tool filtering (include/exclude)
+- Module filtering (include/exclude)
+- Backend integration
+- FastMCP lifecycle management
+
+## Class Definition
+
+```python
+class BaseMCPManager:
+    """Base class for MCP module management."""
+```
+
+## Constructor
+
+### `__init__(name, instructions=None, include_modules=None, exclude_modules=None, include_tools=None, exclude_tools=None, include_tags=None, exclude_tags=None, backend=None)`
+
+Initializes a new BaseMCPManager instance.
+
+#### Parameters
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `name` | `str` | **Required** | Name of the MCP server |
+| `instructions` | `Optional[str]` | `None` | Instructions for the MCP server |
+| `include_modules` | `Optional[List[str]]` | `None` | List of module names to include. If `None`, all modules are included |
+| `exclude_modules` | `Optional[List[str]]` | `None` | List of module names to exclude. If `None`, no modules are excluded |
+| `include_tools` | `Optional[List[str]]` | `None` | Dictionary mapping module names to lists of tool names to include |
+| `exclude_tools` | `Optional[List[str]]` | `None` | Dictionary mapping module names to lists of tool names to exclude |
+| `include_tags` | `Optional[List[str]]` | `None` | List of tags to include |
+| `exclude_tags` | `Optional[List[str]]` | `None` | List of tags to exclude |
+| `backend` | `Optional[NotebookManager]` | `None` | Backend manager class (e.g., `AdataManager`, `NotebookManager`) |
+
+## Instance Attributes
+
+| Attribute | Type | Description |
+|-----------|------|-------------|
+| `exec_backend` | `NotebookManager` | Backend instance for execution |
+| `mcp` | `FastMCP` | The main FastMCP instance |
+| `include_modules` | `Optional[List[str]]` | Modules to include |
+| `exclude_modules` | `Optional[List[str]]` | Modules to exclude |
+| `include_tools` | `Optional[List[str]]` | Tools to include per module |
+| `exclude_tools` | `Optional[List[str]]` | Tools to exclude per module |
+| `available_modules` | `Dict[str, Any]` | Dictionary of available modules |
+
+## Methods
+
+### `init_mcp()`
+
+**Abstract method** - Must be implemented by subclasses.
+
+Initializes the `available_modules` dictionary with module instances.
+
+```python
+def init_mcp(self):
+    """Initialize available modules. To be implemented by subclasses."""
+    raise NotImplementedError("Subclasses must implement init_mcp")
+```
+
+### `register_mcp()`
+
+Registers modules based on include/exclude filters and imports them into the main MCP server.
+
+```python
+def register_mcp(self):
+    """Register modules based on include/exclude filters."""
+```
+
+### `exec_lifespan(server)`
+
+Async context manager that provides the execution backend during the server's lifespan.
+
+```python
+@asynccontextmanager
+async def exec_lifespan(self, server: FastMCP) -> AsyncIterator[Any]:
+    yield self.exec_backend
+```
+
+## Usage Examples
+
+### Basic Implementation
+
+```python
+from scmcp_shared.mcp_base import BaseMCPManager
+from scmcp_shared.backend import AdataManager
+
+class MyMCPManager(BaseMCPManager):
+    """Manager class for My MCP modules."""
+    
+    def init_mcp(self):
+        """Initialize available MCP modules."""
+        self.available_modules = {
+            "io": io_mcp,
+            "pp": pp_mcp,
+            "tl": tl_mcp,
+            "pl": pl_mcp,
+        }
+
+# Usage
+manager = MyMCPManager(
+    name="my-mcp",
+    backend=AdataManager
+)
+mcp = manager.mcp
+```
+
+### With Module Filtering
+
+```python
+# Include only specific modules
+manager = MyMCPManager(
+    name="my-mcp",
+    include_modules=["io", "pp"],
+    backend=AdataManager
+)
+
+# Exclude specific modules
+manager = MyMCPManager(
+    name="my-mcp",
+    exclude_modules=["auto"],
+    backend=AdataManager
+)
+```
+
+### With Tool Filtering
+
+```python
+# Include specific tools from specific modules
+manager = MyMCPManager(
+    name="my-mcp",
+    include_tools={
+        "io": ["read_h5ad", "write_h5ad"],
+        "pp": ["normalize_total", "log1p"],
+    },
+    backend=AdataManager
+)
+
+# Exclude specific tools from specific modules
+manager = MyMCPManager(
+    name="my-mcp",
+    exclude_tools={
+        "auto": ["search_tool", "run_tool"],
+    },
+    backend=AdataManager
+)
+```
+
+### With Tag Filtering
+
+```python
+# Include only tools with specific tags
+manager = MyMCPManager(
+    name="my-mcp",
+    include_tags=["nb", "rag"],
+    backend=AdataManager
+)
+
+# Exclude tools with specific tags
+manager = MyMCPManager(
+    name="my-mcp",
+    exclude_tags=["experimental"],
+    backend=AdataManager
+)
+```
+
+### Complete Example
+
+```python
+from scmcp_shared.mcp_base import BaseMCPManager
+from scmcp_shared.backend import AdataManager
+from .preset import io_mcp, pp_mcp, tl_mcp, pl_mcp
+
+class ScanpyMCPManager(BaseMCPManager):
+    """Manager class for Scanpy MCP modules."""
+    
+    def init_mcp(self):
+        """Initialize available Scanpy MCP modules."""
+        self.available_modules = {
+            "io": io_mcp,
+            "pp": pp_mcp,
+            "tl": tl_mcp,
+            "pl": pl_mcp,
+        }
+
+# Create manager with comprehensive filtering
+manager = ScanpyMCPManager(
+    name="scanpy-mcp",
+    instructions="Scanpy MCP server for single-cell analysis",
+    include_modules=["io", "pp", "tl"],
+    exclude_modules=["auto"],
+    include_tools={
+        "io": ["read_h5ad", "write_h5ad"],
+        "pp": ["normalize_total", "log1p", "highly_variable_genes"],
+    },
+    exclude_tools={
+        "auto": ["search_tool", "run_tool"],
+    },
+    backend=AdataManager
+)
+
+# Get the MCP instance
+mcp = manager.mcp
+```
+
+## Real-World Examples
+
+### ScanpyMCPManager
+
+```python
+class ScanpyMCPManager(BaseMCPManager):
+    """Manager class for Scanpy MCP modules."""
+    
+    def init_mcp(self):
+        """Initialize available Scanpy MCP modules."""
+        self.available_modules = {
+            "io": ScanpyIOMCP().mcp,
+            "pp": ScanpyPreprocessingMCP().mcp,
+            "tl": ScanpyToolsMCP().mcp,
+            "pl": ScanpyPlottingMCP().mcp,
+            "ul": ul_mcp,
+            "auto": auto_mcp,
+            "nb": nb_mcp
+        }
+```
+
+### CellrankMCPManager
+
+```python
+class CellrankMCPManager(BaseMCPManager):
+    """Manager class for Cellrank MCP modules."""
+    
+    def init_mcp(self):
+        """Initialize available Cellrank MCP modules."""
+        self.available_modules = {
+            "io": io_mcp,
+            "pp": pp_mcp,
+            "kernel": kernel_mcp,
+            "estimator": estimator_mcp,
+            "pl": pl_mcp,
+            "tl": tl_mcp,
+            "ul": ul_mcp,
+            "nb": nb_mcp,
+        }
+```
+
+## Best Practices
+
+### 1. Module Naming Convention
+
+Use consistent module names across your MCP server:
+- `io` - Input/Output operations
+- `pp` - Preprocessing
+- `tl` - Tools
+- `pl` - Plotting
+- `ul` - Utilities
+- `auto` - Auto-completion tools
+- `nb` - Notebook integration
+
+### 2. Backend Selection
+
+Choose the appropriate backend based on your use case:
+- `AdataManager` - For AnnData-based operations/tool-mode
+- `NotebookManager` - For notebook-based execution/code-mode
+
+### 3. Filtering Strategy
+
+- Use `include_modules` when you want to limit to specific modules
+- Use `exclude_modules` when you want to exclude specific modules from a larger set
+- Use `include_tools` for fine-grained control over which tools are available
+- Use `exclude_tools` to remove specific tools from modules

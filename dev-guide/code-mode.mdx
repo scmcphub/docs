@@ -1,0 +1,85 @@
+---
+title: "Code Mode"
+description: "Code mode development guide for scmcphub"
+
+---
+
+# Code Mode
+
+The code Mode depends on [abcoder](https://github.com/huang-sh/abcoder)
+
+In code Mode, usually you don't need develop tools, because LLM generate code, and jupyter execute code.
+But if you Always want to call same codes or specific code execution. You also can develop mcp tool in code mode,
+just refer to tool-mode, define schemata, server, use get_nbm to get jupyter backend.
+
+## Overview
+
+Code mode is designed for interactive analysis workflows where the LLM generates code that gets executed in Jupyter notebooks. This mode leverages the `NotebookManager` backend to handle multiple notebook instances with different kernels.
+
+## Key Components
+
+### NotebookManager
+
+The `NotebookManager` is the core backend for code mode operations. It provides:
+
+- **Multi-notebook Management**: Handle multiple Jupyter notebook instances
+- **Code Execution**: Execute generated code with proper error handling
+- **Notebook Persistence**: Save and load notebook states
+
+For complete documentation, see [NotebookManager Reference](./notebook-manager.mdx).
+
+### Backend Access
+
+Use `get_nbm()` to access the NotebookManager in your MCP tools:
+
+```python
+from scmcp_shared.util import get_nbm
+
+@mcp.tool(tags=["nb"])
+def execute_code(code: str):
+    """Execute code in the active Jupyter notebook."""
+    nbm = get_nbm()
+    jce = nbm.active_notebook
+    result = jce.execute(code)
+    return result
+```
+
+## Development Workflow
+
+### 1. Server Configuration
+
+Configure your MCP server to use NotebookManager backend:
+
+```python
+from scmcp_shared.mcp_base import BaseMCPManager
+from abcoder.backend import NotebookManager
+from scmcp_shared.util import get_nbm
+
+mcp = FastMCP(name="MyAssistantServer")
+
+@mcp.tool
+def print_hello():
+    nbm = get_nbm()
+
+    # Get the active notebook
+    jce = nbm.active_notebook
+    
+    code = "print('hello')"
+    # Execute the code
+    result = jce.execute(code)
+
+
+class MyCodeModeManager(BaseMCPManager):
+    def init_mcp(self):
+        self.available_modules = {
+            "nb": nb_mcp,
+            "p": mcp,
+        }
+
+# Create manager with NotebookManager backend
+manager = MyCodeModeManager(
+    name="my-code-mcp",
+    backend=NotebookManager,
+    include_tags=["nb"]
+)
+```

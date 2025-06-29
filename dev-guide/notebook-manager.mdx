@@ -1,0 +1,496 @@
+---
+title: "NotebookManager Reference"
+description: "Complete reference documentation for NotebookManager class"
+---
+
+# NotebookManager Reference
+
+The `NotebookManager` is the core backend manager for handling Jupyter notebooks in the scmcphub ecosystem. It provides a centralized way to manage multiple Jupyter notebook instances with different kernels, making it essential for code-mode execution and interactive analysis workflows.
+
+**Note**: This implementation depends on [abcoder](https://github.com/huang-sh/abcoder) for Jupyter kernel management and code execution.
+
+## Overview
+
+`NotebookManager` serves as the primary notebook management system for:
+- **Multiple Notebook Support**: Managing multiple Jupyter notebook instances simultaneously
+- **Kernel Management**: Handling different Jupyter kernels (Python, R, etc.)
+- **Active Notebook Tracking**: Maintaining the currently active notebook for operations
+- **Code Execution**: Providing a unified interface for code execution across notebooks
+- **Notebook Lifecycle**: Managing creation, deletion, and switching between notebooks
+
+## Class Definition
+
+```python
+class NotebookManager:
+    """Manager for Jupyter notebook instances with multi-kernel support."""
+    
+    def __init__(self):
+        self.notebook = {}
+        self.active_nbid = None
+
+    def create_notebook(self, nbid, path, kernel="python"):
+        """Create a new Jupyter notebook instance."""
+        
+    def delete_notebook(self, nbid):
+        """Delete a notebook instance and shutdown its kernel."""
+        
+    def switch_notebook(self, nbid):
+        """Switch to a different notebook."""
+        
+    @property
+    def active_notebook(self):
+        """Get the currently active notebook instance."""
+```
+
+## Constructor
+
+### `__init__()`
+
+Initializes a new NotebookManager instance.
+
+#### Parameters
+
+No parameters required.
+
+#### Example
+
+```python
+from abcoder.backend import NotebookManager
+
+# Initialize manager
+nbm = NotebookManager()
+```
+
+## Instance Attributes
+
+| Attribute | Type | Description |
+|-----------|------|-------------|
+| `notebook` | `Dict[str, JupyterClientExecutor]` | Dictionary storing notebook instances by notebook ID |
+| `active_nbid` | `Optional[str]` | Currently active notebook ID |
+
+## Methods
+
+### `create_notebook(nbid, path, kernel="python")`
+
+Creates a new Jupyter notebook instance.
+
+#### Parameters
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `nbid` | `str` | **Required** | Unique notebook ID |
+| `path` | `str` | **Required** | Path to save the notebook file |
+| `kernel` | `str` | `"python"` | Jupyter kernel to use (e.g., "python", "ir", "r") |
+
+#### Behavior
+
+1. Creates a new `JupyterClientExecutor` instance with the specified kernel
+2. Associates the notebook with the provided ID
+3. Sets the new notebook as the active notebook
+4. Automatically saves the notebook if a path is provided
+
+#### Example
+
+```python
+# Create a Python notebook
+nbm.create_notebook("notebook1", "/path/to/notebook1.ipynb", "python")
+
+# Create an R notebook
+nbm.create_notebook("notebook2", "/path/to/notebook2.ipynb", "ir")
+
+# Create a notebook with default Python kernel
+nbm.create_notebook("notebook3", "/path/to/notebook3.ipynb")
+```
+
+### `delete_notebook(nbid)`
+
+Deletes a notebook instance and shuts down its kernel.
+
+#### Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `nbid` | `str` | Notebook ID to delete |
+
+#### Behavior
+
+1. Shuts down the notebook's Jupyter kernel
+2. Removes the notebook from the manager
+3. Cleans up associated resources
+
+#### Example
+
+```python
+# Delete a notebook
+nbm.delete_notebook("notebook1")
+```
+
+### `switch_notebook(nbid)`
+
+Switches the active notebook to the specified notebook ID.
+
+#### Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `nbid` | `str` | Notebook ID to switch to |
+
+#### Behavior
+
+1. Changes the `active_nbid` to the specified notebook ID
+2. No validation is performed - ensure the notebook exists before switching
+
+#### Example
+
+```python
+# Switch to a different notebook
+nbm.switch_notebook("notebook2")
+```
+
+### `active_notebook` (Property)
+
+Gets the currently active notebook instance.
+
+#### Returns
+
+- **Type**: `JupyterClientExecutor`
+- **Description**: The currently active notebook instance
+
+#### Behavior
+
+1. Raises `ValueError` if no notebooks have been created
+2. Raises `ValueError` if the active notebook ID doesn't exist
+3. Returns the `JupyterClientExecutor` instance for the active notebook
+
+#### Example
+
+```python
+# Get the active notebook
+jce = nbm.active_notebook
+
+# Execute code in the active notebook
+result = jce.execute("print('Hello, World!')")
+```
+
+## JupyterClientExecutor
+
+The `NotebookManager` uses `JupyterClientExecutor` instances to handle individual notebooks. Each executor provides:
+
+### Key Features
+
+- **Kernel Management**: Handles Jupyter kernel lifecycle
+- **Code Execution**: Executes code and returns results
+- **Output Handling**: Manages stdout, stderr, and display data
+- **Error Handling**: Captures and formats execution errors
+- **Notebook Persistence**: Saves notebook state to files
+
+### Main Methods
+
+```python
+class JupyterClientExecutor:
+    def execute(self, code: str, add_cell: bool = True, backup_var: Optional[str] = None, language: str = "Python") -> Dict[str, Any]:
+        """Execute code in the Jupyter kernel."""
+        
+    def add_markdown(self, markdown_text: str) -> None:
+        """Add a markdown cell to the notebook."""
+        
+    def save_notebook(self, filename: Optional[str] = None) -> Optional[str]:
+        """Save the current notebook state to a file."""
+        
+    def shutdown(self) -> None:
+        """Shut down the kernel and the client."""
+```
+
+## Usage Examples
+
+### Basic Usage
+
+```python
+from abcoder.backend import NotebookManager
+
+# Initialize manager
+nbm = NotebookManager()
+
+# Create a notebook
+nbm.create_notebook("analysis1", "/path/to/analysis1.ipynb", "python")
+
+# Get the active notebook
+jce = nbm.active_notebook
+
+# Execute code
+result = jce.execute("import pandas as pd\nprint('Pandas imported successfully')")
+
+# Check result
+if result["success"]:
+    print("Code executed successfully")
+    print(f"Output: {result['result']}")
+else:
+    print(f"Error: {result['error']}")
+```
+
+### Multi-Notebook Workflow
+
+```python
+# Create multiple notebooks for different analyses
+nbm.create_notebook("data_loading", "/path/to/data_loading.ipynb", "python")
+jce1 = nbm.active_notebook
+jce1.execute("import scanpy as sc\nadata = sc.read_h5ad('data.h5ad')")
+
+# Switch to a different notebook for analysis
+nbm.create_notebook("analysis", "/path/to/analysis.ipynb", "python")
+jce2 = nbm.active_notebook
+jce2.execute("import scanpy as sc\nsc.pp.normalize_total(adata)")
+
+# Switch back to the first notebook
+nbm.switch_notebook("data_loading")
+jce1 = nbm.active_notebook
+jce1.execute("print(f'Data shape: {adata.shape}')")
+```
+
+### Integration with MCP Tools
+
+```python
+from scmcp_shared.util import get_nbm
+from fastmcp import FastMCP
+
+@mcp.tool(tags=["nb"])
+def execute_code(code: str, backup_var: str = None):
+    """Execute code in the active Jupyter notebook."""
+    nbm = get_nbm()
+    
+    # Get the active notebook
+    jce = nbm.active_notebook
+    
+    # Execute the code
+    result = jce.execute(code, backup_var=backup_var)
+    
+    return {
+        "notebook_id": nbm.active_nbid,
+        "success": result["success"],
+        "result": result["result"],
+        "error": result.get("error", ""),
+        "display_data": result.get("display_data", "")
+    }
+```
+
+### Multi-Kernel Support
+
+```python
+# Create notebooks with different kernels
+nbm.create_notebook("python_analysis", "/path/to/python.ipynb", "python")
+jce_py = nbm.active_notebook
+jce_py.execute("import numpy as np\nprint('Python kernel working')")
+
+# Create R notebook
+nbm.create_notebook("r_analysis", "/path/to/r.ipynb", "ir")
+jce_r = nbm.active_notebook
+jce_r.execute("library(ggplot2)\nprint('R kernel working')")
+
+# Switch between kernels as needed
+nbm.switch_notebook("python_analysis")
+jce_py.execute("import scanpy as sc")
+
+nbm.switch_notebook("r_analysis")
+jce_r.execute("library(Seurat)")
+```
+
+### Error Handling
+
+```python
+def safe_code_execution(nbm, code: str):
+    """Safely execute code with proper error handling."""
+    try:
+        jce = nbm.active_notebook
+        result = jce.execute(code)
+        
+        if result["success"]:
+            return {"success": True, "output": result["result"]}
+        else:
+            return {"success": False, "error": result["error"]}
+            
+    except ValueError as e:
+        return {"success": False, "error": f"No active notebook: {e}"}
+    except Exception as e:
+        return {"success": False, "error": f"Unexpected error: {e}"}
+```
+
+### Advanced Code Execution Patterns
+
+```python
+def execute_with_backup(nbm, code: str, backup_var: str):
+    """Execute code with variable backup for safety."""
+    jce = nbm.active_notebook
+    
+    # Execute with backup - creates a backup of the variable before execution
+    result = jce.execute(code, backup_var=backup_var, add_cell=True)
+    
+    if result["success"]:
+        print(f"Code executed successfully with backup of {backup_var}")
+        return result
+    else:
+        print(f"Execution failed: {result['error']}")
+        return result
+
+def execute_multi_step_analysis(nbm, steps: list):
+    """Execute a multi-step analysis with documentation."""
+    jce = nbm.active_notebook
+    
+    for i, (step_name, code) in enumerate(steps):
+        # Add markdown documentation
+        jce.add_markdown(f"## Step {i+1}: {step_name}")
+        
+        # Execute the step
+        result = jce.execute(code, add_cell=True)
+        
+        if not result["success"]:
+            raise RuntimeError(f"Step {step_name} failed: {result['error']}")
+        
+        print(f"Step {step_name} completed successfully")
+    
+    # Save the notebook
+    jce.save_notebook()
+    print("Analysis completed and notebook saved")
+```
+
+### Single-Cell Analysis Workflow
+
+```python
+def run_single_cell_analysis(nbm, data_path: str):
+    """Run a complete single-cell analysis workflow."""
+    jce = nbm.active_notebook
+    
+    # Step 1: Data loading
+    jce.add_markdown("# Single-Cell Analysis Workflow")
+    jce.add_markdown("## Step 1: Data Loading")
+    
+    load_code = f"""
+import scanpy as sc
+import pandas as pd
+import numpy as np
+
+# Load data
+adata = sc.read_h5ad('{data_path}')
+print(f"Loaded data: {{adata.n_obs}} cells, {{adata.n_vars}} genes")
+"""
+    jce.execute(load_code, add_cell=True)
+    
+    # Step 2: Quality control
+    jce.add_markdown("## Step 2: Quality Control")
+    qc_code = """
+# Calculate quality metrics
+sc.pp.calculate_qc_metrics(adata, inplace=True)
+
+# Filter cells
+sc.pp.filter_cells(adata, min_genes=200)
+sc.pp.filter_genes(adata, min_cells=3)
+
+print(f"After QC: {adata.n_obs} cells, {adata.n_vars} genes")
+"""
+    jce.execute(qc_code, add_cell=True)
+    
+    # Step 3: Normalization
+    jce.add_markdown("## Step 3: Normalization")
+    norm_code = """
+# Normalize data
+sc.pp.normalize_total(adata, target_sum=1e4)
+sc.pp.log1p(adata)
+
+print("Data normalized successfully")
+"""
+    jce.execute(norm_code, add_cell=True)
+    
+    # Step 4: Find highly variable genes
+    jce.add_markdown("## Step 4: Highly Variable Genes")
+    hvg_code = """
+# Find highly variable genes
+sc.pp.highly_variable_genes(adata, min_mean=0.0125, max_mean=3, min_disp=0.5)
+adata = adata[:, adata.var.highly_variable]
+
+print(f"Selected {adata.n_vars} highly variable genes")
+"""
+    jce.execute(hvg_code, add_cell=True)
+    
+    # Save the notebook
+    jce.save_notebook()
+    print("Single-cell analysis workflow completed")
+```
+
+## Best Practices
+
+### 1. Notebook ID Management
+
+Use descriptive and unique notebook IDs:
+
+```python
+# Good notebook IDs
+nbm.create_notebook("data_preprocessing", "/path/to/preprocessing.ipynb")
+nbm.create_notebook("quality_control", "/path/to/qc.ipynb")
+nbm.create_notebook("analysis_pipeline", "/path/to/analysis.ipynb")
+
+# Avoid generic IDs
+# nbm.create_notebook("notebook1", "/path/to/notebook1.ipynb")  # Less descriptive
+```
+
+### 2. Kernel Selection
+
+Choose appropriate kernels for your analysis:
+
+```python
+# Python for general analysis
+nbm.create_notebook("python_analysis", "/path/to/python.ipynb", "python")
+```
+
+## Integration Patterns
+
+### With BaseMCPManager
+
+```python
+from scmcp_shared.mcp_base import BaseMCPManager
+from abcoder.backend import NotebookManager
+
+class MyMCPManager(BaseMCPManager):
+    def init_mcp(self):
+        self.available_modules = {
+            "nb": nb_mcp,
+            "analysis": analysis_mcp,
+        }
+
+# Create manager with NotebookManager backend
+manager = MyMCPManager(
+    name="my-mcp",
+    backend=NotebookManager,
+    include_tags=["nb"]
+)
+```
+
+### With MCP Tools
+
+```python
+from scmcp_shared.util import get_nbm
+from pydantic import BaseModel
+
+class ExecuteCodeRequest(BaseModel):
+    code: str
+    backup_var: str = None
+    add_cell: bool = True
+
+@mcp.tool(tags=["nb"])
+def execute_code(request: ExecuteCodeRequest):
+    """Execute code in Jupyter notebook."""
+    nbm = get_nbm()
+    jce = nbm.active_notebook
+    
+    result = jce.execute(
+        request.code,
+        add_cell=request.add_cell,
+        backup_var=request.backup_var
+    )
+    
+    return {
+        "notebook_id": nbm.active_nbid,
+        "success": result["success"],
+        "result": result["result"],
+        "error": result.get("error", ""),
+        "display_data": result.get("display_data", "")
+    }
+```

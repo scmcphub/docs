@@ -1,0 +1,296 @@
+---
+title: "MCP server"
+description: "MCP server development guide for scmcphub"
+
+---
+
+The basic development way to create a mcp server is using [mcp](https://github.com/modelcontextprotocol/python-sdk)/[fastmcp](https://gofastmcp.com/getting-started/welcome)
+
+you can refer to their documentation for detailed guide. Here we just introduce the API in scmcphub, which is designed to reuse existing tools and further reduce the difficulty of MCP development.
+
+## BaseMCPManager
+
+The `BaseMCPManager` is the core class for creating MCP servers in scmcphub. It provides a standardized way to manage multiple MCP modules with built-in filtering capabilities.
+
+For a complete reference documentation, see [BaseMCPManager Reference](./base-mcp-manager.mdx).
+
+### Key Features
+
+1. **Module Management**: Automatically handles module registration and organization
+2. **Filtering**: Built-in support for including/excluding modules and tools
+3. **Backend Integration**: Seamless integration with different backend managers
+4. **Tag-based Filtering**: Support for filtering tools based on tags
+5. **Async Support**: Proper async/await handling for server lifespan
+
+### Basic Usage
+
+```python
+from scmcp_shared.mcp_base import BaseMCPManager
+from scmcp_shared.backend import AdataManager
+
+class MyMCPManager(BaseMCPManager):
+    def init_mcp(self):
+        self.available_modules = {
+            "io": io_mcp,
+            "pp": pp_mcp,
+            "tl": tl_mcp,
+        }
+
+# Create and use
+manager = MyMCPManager("my-mcp", backend=AdataManager)
+mcp = manager.mcp
+```
+
+For detailed usage examples, best practices, and troubleshooting, see the [complete BaseMCPManager reference](./base-mcp-manager.mdx).
+
+## Backend Access Functions
+
+The `get_ads` and `get_nbm` functions are essential for accessing backend managers within MCP tools. These functions provide access to the appropriate backend based on the execution mode.
+
+For complete documentation, see [Backend Functions Reference](./backend-functions.mdx).
+
+### Quick Overview
+
+#### `get_ads()` - Tool Mode Backend
+
+```python
+def get_ads():
+    ctx = get_context()
+    ads = ctx.request_context.lifespan_context
+    return ads
+```
+
+- **Purpose**: Access `AdataManager` for AnnData operations
+- **Mode**: Tool Mode (`tool-mode`)
+- **Returns**: `AdataManager` instance
+
+#### `get_nbm()` - Code Mode Backend
+
+```python
+def get_nbm():
+    ctx = get_context()
+    nbm = ctx.request_context.lifespan_context
+    return nbm
+```
+
+- **Purpose**: Access `NotebookManager` for Jupyter notebook operations
+- **Mode**: Code Mode (`code-mode`)
+- **Returns**: `NotebookManager` instance
+
+### Usage Examples
+
+#### Tool Mode Example
+
+```python
+from scmcp_shared.util import get_ads
+from scmcp_shared.schema import AdataInfo
+
+@mcp.tool()
+def process_data(adinfo: AdataInfo):
+    """Process AnnData using AdataManager."""
+    ads = get_ads()  # Get AdataManager
+    adata = ads.get_adata(adinfo=adinfo)
+    
+    # Process the data
+    # ... processing logic ...
+    
+    return {"message": "Data processed successfully"}
+```
+
+#### Code Mode Example
+
+```python
+from scmcp_shared.util import get_nbm
+
+@mcp.tool(tags=["nb"])
+def execute_code(code: str):
+    """Execute code in Jupyter notebook."""
+    nbm = get_nbm()  # Get NotebookManager
+    jce = nbm.active_notebook
+    result = jce.execute(code)
+    
+    return {
+        "notebook_id": nbm.active_nbid,
+        "result": result
+    }
+```
+
+### Backend Selection
+
+The choice between `get_ads` and `get_nbm` depends on your server configuration:
+
+- **AdataManager Backend**: Use `get_ads()` for AnnData-based operations
+- **NotebookManager Backend**: Use `get_nbm()` for notebook-based execution
+
+For detailed information about backend managers, context system, error handling, and best practices, see the [complete Backend Functions reference](./backend-functions.mdx).
+
+## AdataManager
+
+The `AdataManager` is the primary backend manager for handling AnnData objects in tool mode. It provides centralized management of multiple AnnData objects with different data types and sample IDs.
+
+For complete documentation, see [AdataManager Reference](./adata-manager.mdx).
+
+### Quick Overview
+
+```python
+class AdataManager:
+    def __init__(self, add_adtypes=None):
+        self.adata_dic = {"exp": {}, "activity": {}, "cnv": {}, "splicing": {}}
+        if isinstance(add_adtypes, str):
+            self.adata_dic[add_adtypes] = {}
+        elif isinstance(add_adtypes, Iterable):
+            self.adata_dic.update({adtype: {} for adtype in add_adtypes})
+        self.active_id = None
+        self.metadatWa = {}
+        self.cr_kernel = {}
+        self.cr_estimator = {}
+
+    def get_adata(self, sampleid=None, adtype="exp", adinfo=None):
+        if adinfo is not None:
+            kwargs = adinfo.model_dump()
+            sampleid = kwargs.get("sampleid", None)
+            adtype = kwargs.get("adtype", "exp")
+        try:
+            if self.active_id is None:
+                return None
+            sampleid = sampleid or self.active_id
+            return self.adata_dic[adtype][sampleid]
+        except KeyError as e:
+            raise KeyError(
+                f"Key {e} not found in adata_dic[{adtype}].Please check the sampleid or adtype."
+            )
+        except Exception as e:
+            raise Exception(f"fuck {e} {type(e)}")
+
+    def set_adata(self, adata, sampleid=None, sdtype="exp", adinfo=None):
+        if adinfo is not None:
+            kwargs = adinfo.model_dump()
+            sampleid = kwargs.get("sampleid", None)
+            sdtype = kwargs.get("adtype", "exp")
+        sampleid = sampleid or self.active_id
+        if sdtype not in self.adata_dic:
+            self.adata_dic[sdtype] = {}
+        self.adata_dic[sdtype][sampleid] = adata
+```
+
+### Key Features
+
+- **Multi-type Support**: Manages different types of AnnData (exp, activity, cnv, splicing)
+- **Sample ID Management**: Tracks and organizes data by sample identifiers
+- **Active Sample Tracking**: Maintains the currently active sample for operations
+- **Data Consistency**: Ensures proper data access and storage patterns
+
+### Basic Usage
+
+```python
+from scmcp_shared.backend import AdataManager
+from scmcp_shared.schema import AdataInfo
+import scanpy as sc
+
+# Initialize manager
+ads = AdataManager()
+
+# Set active sample
+ads.active_id = "pbmc_sample"
+
+# Load and store data
+adata = sc.read_h5ad("pbmc3k.h5ad")
+ads.set_adata(adata, sampleid="pbmc_sample", sdtype="exp")
+
+# Retrieve data
+retrieved_adata = ads.get_adata(adinfo=AdataInfo(sampleid="pbmc_sample"))
+```
+
+### Data Types
+
+The AdataManager supports these default data types:
+- **exp**: Expression data (default)
+- **activity**: Activity scores from pathway analysis
+- **cnv**: Copy number variation data
+- **splicing**: Alternative splicing data
+
+You can also add custom data types during initialization:
+
+```python
+# Add custom types
+ads = AdataManager(add_adtypes=["pathway_scores", "regulatory_network"])
+```
+
+For detailed information about methods, data structures, best practices, and troubleshooting, see the [complete AdataManager reference](./adata-manager.mdx).
+
+## NotebookManager
+
+The `NotebookManager` is the primary backend manager for handling Jupyter notebooks in code mode. It provides centralized management of multiple notebook instances with different kernels, making it essential for interactive analysis workflows.
+
+For complete documentation, see [NotebookManager Reference](./notebook-manager.mdx).
+
+### Quick Overview
+
+
+### Key Features
+
+- **Multiple Notebook Support**: Manages multiple Jupyter notebook instances simultaneously
+- **Kernel Management**: Handles different Jupyter kernels (Python, R, etc.)
+- **Active Notebook Tracking**: Maintains the currently active notebook for operations
+- **Code Execution**: Provides a unified interface for code execution across notebooks
+- **Notebook Lifecycle**: Manages creation, deletion, and switching between notebooks
+
+### Basic Usage
+
+```python
+from abcoder.backend import NotebookManager
+
+# Initialize manager
+nbm = NotebookManager()
+
+# Create a notebook
+nbm.create_notebook("analysis1", "/path/to/analysis1.ipynb", "python")
+
+# Get the active notebook
+jce = nbm.active_notebook
+
+# Execute code
+result = jce.execute("import pandas as pd\nprint('Pandas imported successfully')")
+
+# Switch to a different notebook
+nbm.create_notebook("r_analysis", "/path/to/r_analysis.ipynb", "ir")
+jce_r = nbm.active_notebook
+jce_r.execute("library(ggplot2)\nprint('R kernel working')")
+```
+
+### Multi-Kernel Support
+
+The NotebookManager supports various Jupyter kernels:
+
+```python
+# Python kernel (default)
+nbm.create_notebook("python_nb", "/path/to/python.ipynb", "python")
+
+# R kernel
+nbm.create_notebook("r_nb", "/path/to/r.ipynb", "ir")
+
+# Julia kernel
+nbm.create_notebook("julia_nb", "/path/to/julia.ipynb", "julia-1.8")
+```
+
+### Integration with MCP Tools
+
+```python
+from scmcp_shared.util import get_nbm
+
+@mcp.tool(tags=["nb"])
+def execute_code(code: str, backup_var: str = None):
+    """Execute code in the active Jupyter notebook."""
+    nbm = get_nbm()
+    jce = nbm.active_notebook
+    
+    result = jce.execute(code, backup_var=backup_var)
+    
+    return {
+        "notebook_id": nbm.active_nbid,
+        "success": result["success"],
+        "result": result["result"],
+        "error": result.get("error", ""),
+        "display_data": result.get("display_data", "")
+    }
+```

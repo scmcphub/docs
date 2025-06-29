@@ -1,0 +1,381 @@
+---
+title: "Backend Functions Reference"
+description: "Reference documentation for get_nbm and get_ads functions"
+---
+
+# Backend Functions Reference
+
+The `get_nbm` and `get_ads` functions are essential utility functions in the scmcphub ecosystem that provide access to the backend managers during MCP server execution. These functions are used to retrieve the appropriate backend context based on the execution mode.
+
+## Overview
+
+These functions serve as accessors to the backend managers that are injected into the MCP server's lifespan context. They are crucial for:
+
+- **Tool Mode**: Accessing `AdataManager` for AnnData operations
+- **Code Mode**: Accessing `NotebookManager` for Jupyter notebook operations
+
+## Function Reference
+
+### `get_ads()`
+
+Retrieves the `AdataManager` instance from the current request context.
+
+#### Signature
+
+```python
+def get_ads():
+    ctx = get_context()
+    ads = ctx.request_context.lifespan_context
+    return ads
+```
+
+#### Returns
+
+- **Type**: `AdataManager`
+- **Description**: The AdataManager instance that manages AnnData objects
+
+#### Usage Context
+
+- **Mode**: Tool Mode (`tool-mode`)
+- **Backend**: `AdataManager`
+- **Purpose**: Managing AnnData objects for single-cell analysis
+
+#### Example
+
+```python
+from scmcp_shared.util import get_ads
+from scmcp_shared.schema import AdataInfo
+
+@mcp.tool()
+def read_data(request: AdataInfo):
+    """Read AnnData from file."""
+    ads = get_ads()  # Get AdataManager instance
+    adata = ads.get_adata(adinfo=request)
+    return {"message": f"Loaded data with {adata.n_obs} cells"}
+```
+
+### `get_nbm()`
+
+Retrieves the `NotebookManager` instance from the current request context.
+
+#### Signature
+
+```python
+def get_nbm():
+    ctx = get_context()
+    nbm = ctx.request_context.lifespan_context
+    return nbm
+```
+
+#### Returns
+
+- **Type**: `NotebookManager`
+- **Description**: The NotebookManager instance that manages Jupyter notebooks
+
+#### Usage Context
+
+- **Mode**: Code Mode (`code-mode`)
+- **Backend**: `NotebookManager`
+- **Purpose**: Managing Jupyter notebook execution
+
+#### Example
+
+```python
+from scmcp_shared.util import get_nbm
+
+@mcp.tool()
+def execute_code(code: str):
+    """Execute code in Jupyter notebook."""
+    nbm = get_nbm()  # Get NotebookManager instance
+    jce = nbm.active_notebook
+    result = jce.execute(code)
+    return result
+```
+
+## Backend Managers
+
+### AdataManager
+
+The `AdataManager` is responsible for managing AnnData objects in tool mode.
+
+#### Key Features
+
+- **Multi-type Support**: Manages different types of AnnData (exp, activity, cnv, splicing)
+- **Active Sample Management**: Tracks the currently active sample ID
+- **Sample ID Validation**: Ensures data consistency across operations
+
+#### Main Methods
+
+```python
+class AdataManager:
+    def get_adata(self, sampleid=None, adtype="exp", adinfo=None):
+        """Retrieve AnnData object."""
+        
+    def set_adata(self, adata, sampleid=None, sdtype="exp", adinfo=None):
+        """Store AnnData object."""
+        
+    @property
+    def active_id(self):
+        """Get the currently active sample ID."""
+```
+
+#### Example Usage
+
+```python
+def process_data(adinfo: AdataInfo):
+    ads = get_ads()
+    
+    # Get AnnData for current sample
+    adata = ads.get_adata(adinfo=adinfo)
+    
+    # Process the data
+    # ... processing logic ...
+    
+    # Store the processed data
+    ads.set_adata(adata, adinfo=adinfo)
+    
+    return {"message": "Data processed successfully"}
+```
+
+### NotebookManager
+
+The `NotebookManager` is responsible for managing Jupyter notebooks in code mode.
+
+#### Key Features
+
+- **Multiple Notebook Support**: Manages multiple notebook instances
+- **Active Notebook Tracking**: Maintains the currently active notebook
+- **Kernel Management**: Handles Jupyter kernel lifecycle
+
+#### Main Methods
+
+```python
+class NotebookManager:
+    def create_notebook(self, nbid, path, kernel="python"):
+        """Create a new notebook instance."""
+        
+    def delete_notebook(self, nbid):
+        """Delete a notebook instance."""
+        
+    def switch_notebook(self, nbid):
+        """Switch to a different notebook."""
+        
+    @property
+    def active_notebook(self):
+        """Get the currently active notebook."""
+```
+
+#### Example Usage
+
+```python
+def run_analysis(code: str):
+    nbm = get_nbm()
+    
+    # Get the active notebook
+    jce = nbm.active_notebook
+    
+    # Execute code
+    result = jce.execute(code, add_cell=True)
+    
+    return {
+        "notebook_id": nbm.active_nbid,
+        "result": result
+    }
+```
+
+## Context System
+
+Both functions rely on FastMCP's context system to access the backend managers.
+
+### Context Flow
+
+1. **Server Initialization**: Backend manager is created and injected into lifespan context
+2. **Request Processing**: Context is available during tool execution
+3. **Function Call**: `get_context()` retrieves the current request context
+4. **Backend Access**: Backend manager is extracted from lifespan context
+
+### Context Structure
+
+```python
+ctx = get_context()
+# ctx.request_context.lifespan_context contains the backend manager
+```
+
+## Mode-Specific Usage
+
+### Tool Mode (Default)
+
+```python
+# Server configuration
+manager = MyMCPManager(
+    name="my-mcp",
+    backend=AdataManager  # Uses AdataManager
+)
+
+# Tool implementation
+@mcp.tool()
+def my_tool(request: MyRequest):
+    ads = get_ads()  # Get AdataManager
+    adata = ads.get_adata(adinfo=request.adinfo)
+    # ... tool logic ...
+```
+
+### Code Mode
+
+```python
+# Server configuration
+manager = MyMCPManager(
+    name="my-mcp",
+    backend=NotebookManager,  # Uses NotebookManager
+    include_tags=["nb"]  # Include notebook tools
+)
+
+# Tool implementation
+@mcp.tool(tags=["nb"])
+def execute_code(code: str):
+    nbm = get_nbm()  # Get NotebookManager
+    jce = nbm.active_notebook
+    result = jce.execute(code)
+    return result
+```
+
+## Error Handling
+
+### Common Issues
+
+1. **Context Not Available**: Ensure the function is called within an MCP tool context
+2. **Wrong Backend Type**: Verify the correct backend is configured for your use case
+3. **Missing Dependencies**: Ensure FastMCP dependencies are properly installed
+
+### Error Examples
+
+```python
+# This will fail if not in MCP context
+def standalone_function():
+    try:
+        ads = get_ads()
+    except Exception as e:
+        print(f"Context not available: {e}")
+
+# This will fail if wrong backend is used
+def wrong_backend_usage():
+    # If server uses NotebookManager but tool expects AdataManager
+    ads = get_ads()  # Will return NotebookManager, not AdataManager
+```
+
+## Best Practices
+
+### 1. Import Location
+
+Import these functions at the module level:
+
+```python
+from scmcp_shared.util import get_ads, get_nbm
+```
+
+### 2. Error Checking
+
+Always check if the backend is available:
+
+```python
+def safe_backend_access():
+    try:
+        ads = get_ads()
+        return ads.get_adata(adinfo=adinfo)
+    except Exception as e:
+        raise ToolError(f"Failed to access backend: {e}")
+```
+
+### 3. Type Hints
+
+Use proper type hints for better code clarity:
+
+```python
+from scmcp_shared.backend import AdataManager, NotebookManager
+
+def get_ads() -> AdataManager:
+    ctx = get_context()
+    return ctx.request_context.lifespan_context
+
+def get_nbm() -> NotebookManager:
+    ctx = get_context()
+    return ctx.request_context.lifespan_context
+```
+
+### 4. Context Validation
+
+Validate the backend type when needed:
+
+```python
+def validate_backend():
+    backend = get_ads()  # or get_nbm()
+    if not isinstance(backend, AdataManager):
+        raise ValueError("Expected AdataManager backend")
+```
+
+## Integration Examples
+
+### Complete Tool Example
+
+```python
+from fastmcp import FastMCP
+from scmcp_shared.util import get_ads
+from scmcp_shared.schema import AdataInfo
+from pydantic import BaseModel
+
+class ReadDataRequest(BaseModel):
+    file_path: str
+    adinfo: AdataInfo = AdataInfo()
+
+@mcp.tool()
+def read_h5ad(request: ReadDataRequest):
+    """Read AnnData from H5AD file."""
+    try:
+        ads = get_ads()
+        import scanpy as sc
+        
+        # Read the data
+        adata = sc.read_h5ad(request.file_path)
+        
+        # Store in backend
+        ads.set_adata(adata, adinfo=request.adinfo)
+        
+        return {
+            "message": f"Successfully loaded {adata.n_obs} cells and {adata.n_vars} genes",
+            "sampleid": request.adinfo.sampleid or ads.active_id
+        }
+    except Exception as e:
+        raise ToolError(f"Failed to read data: {e}")
+```
+
+### Complete Code Mode Example
+
+```python
+from fastmcp import FastMCP
+from scmcp_shared.util import get_nbm
+from pydantic import BaseModel
+
+class ExecuteCodeRequest(BaseModel):
+    code: str
+    backup_var: str = None
+
+@mcp.tool(tags=["nb"])
+def execute_code(request: ExecuteCodeRequest):
+    """Execute code in Jupyter notebook."""
+    try:
+        nbm = get_nbm()
+        jce = nbm.active_notebook
+        
+        # Execute the code
+        result = jce.execute(
+            request.code, 
+            backup_var=request.backup_var
+        )
+        
+        return {
+            "notebook_id": nbm.active_nbid,
+            "result": result
+        }
+    except Exception as e:
+        raise ToolError(f"Failed to execute code: {e}")
+```

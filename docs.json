@@ -65,7 +65,12 @@
                         "group": "Development Guide",
                         "pages": [
                             "dev-guide/tool-mode",
-                            "dev-guide/code-mode"
+                            "dev-guide/code-mode",
+                            "dev-guide/mcp-server",
+                            "dev-guide/base-mcp-manager",
+                            "dev-guide/backend-functions",
+                            "dev-guide/adata-manager",
+                            "dev-guide/notebook-manager"
                         ]
                     },
                     {
@@ -115,7 +120,11 @@
                         "group": "Development Guide",
                         "pages": [
                             "dev-guide/tool-mode_cn",
-                            "dev-guide/code-mode_cn"
+                            "dev-guide/code-mode_cn",
+                            "dev-guide/mcp-server",
+                            "dev-guide/base-mcp-manager",
+                            "dev-guide/backend-functions",
+                            "dev-guide/notebook-manager"
                         ]
                     },
                     {
