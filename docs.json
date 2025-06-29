@@ -68,9 +68,7 @@
                             "dev-guide/code-mode",
                             "dev-guide/mcp-server",
                             "dev-guide/base-mcp-manager",
-                            "dev-guide/backend-functions",
-                            "dev-guide/adata-manager",
-                            "dev-guide/notebook-manager"
+                            "dev-guide/backend-functions"
                         ]
                     },
                     {

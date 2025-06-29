@@ -18,7 +18,7 @@ This guide demonstrates how to develop an MCP (Model Context Protocol) based scm
 We'll create a simple demo that demonstrates the basic structure of an MCP tool. This demo will:
 - Query data from `adata.uns` (unstructured data storage in AnnData)
 - List available keys in the unstructured data
-- Follow scmcphub conventions and best practices
+- Follow scmcphub conventions
 
 
 ## Project Setup
@@ -92,12 +92,7 @@ class UNSKeyParam(BaseModel):
 The server file contains the core logic of your MCP tools. Here's a detailed breakdown:
 
 ```python
-"""
-Server implementation for mcp-demo.
 
-This module defines the MCP tools that can be used to interact with AnnData objects.
-Each tool is decorated with @mcp.tool() and follows the scmcphub conventions.
-"""
 from fastmcp import FastMCP, Context
 from fastmcp.exceptions import ToolError
 from scmcp_shared.schema import AdataInfo
@@ -135,21 +130,13 @@ def uns_key(
         # Retrieve the value
         result = adata.uns[request.key]
         
-        # Log the operation for tracking and debugging
-        add_op_log(adata, "uns_key", {"key": request.key}, adinfo)
-        
         # Return structured response
         return {
             "key": request.key,
-            "value": str(result),
-            "type": type(result).__name__
+            "value": result
         }
-    except ToolError as e:
-        # Re-raise tool errors as-is
-        raise ToolError(str(e))
     except Exception as e:
-        # Handle unexpected errors
-        raise ToolError(f"Unexpected error: {e}")
+        raise ToolError(str(e))
 
 
 @mcp.tool()
@@ -175,14 +162,12 @@ def list_uns_keys(
 
 **Important Concepts:**
 
-1. **FastMCP**: The framework that provides the MCP functionality
-2. **ToolError**: Custom exception for tool-specific errors
 3. **AdataInfo**: Standard parameter for specifying which AnnData object to use
 4. **get_ads()**: Utility function to access the AnnData manager
 
 ### 3. CLI Implementation (`cli.py`)
 
-The CLI file provides a command-line interface for your MCP tools:
+The CLI file provides a command-line interface for your MCP tools in scmcphub:
 
 ```python
 """

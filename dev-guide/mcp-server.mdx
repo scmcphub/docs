@@ -53,25 +53,11 @@ For complete documentation, see [Backend Functions Reference](./backend-function
 
 #### `get_ads()` - Tool Mode Backend
 
-```python
-def get_ads():
-    ctx = get_context()
-    ads = ctx.request_context.lifespan_context
-    return ads
-```
-
 - **Purpose**: Access `AdataManager` for AnnData operations
 - **Mode**: Tool Mode (`tool-mode`)
 - **Returns**: `AdataManager` instance
 
 #### `get_nbm()` - Code Mode Backend
-
-```python
-def get_nbm():
-    ctx = get_context()
-    nbm = ctx.request_context.lifespan_context
-    return nbm
-```
 
 - **Purpose**: Access `NotebookManager` for Jupyter notebook operations
 - **Mode**: Code Mode (`code-mode`)
@@ -119,8 +105,8 @@ def execute_code(code: str):
 
 The choice between `get_ads` and `get_nbm` depends on your server configuration:
 
-- **AdataManager Backend**: Use `get_ads()` for AnnData-based operations
-- **NotebookManager Backend**: Use `get_nbm()` for notebook-based execution
+- **AdataManager Backend**: Use `get_ads()` for tool-mode
+- **NotebookManager Backend**: Use `get_nbm()` for code-mode
 
 For detailed information about backend managers, context system, error handling, and best practices, see the [complete Backend Functions reference](./backend-functions.mdx).
 
@@ -294,3 +280,5 @@ def execute_code(code: str, backup_var: str = None):
         "display_data": result.get("display_data", "")
     }
 ```
+
+For detailed information about methods, JupyterClientExecutor integration, best practices, and troubleshooting, see the [complete NotebookManager reference](./notebook-manager.mdx).

@@ -16,6 +16,8 @@ just refer to tool-mode, define schemata, server, use get_nbm to get jupyter bac
 
 Code mode is designed for interactive analysis workflows where the LLM generates code that gets executed in Jupyter notebooks. This mode leverages the `NotebookManager` backend to handle multiple notebook instances with different kernels.
 
+Additionally, it can generate complete Jupyter notebooks containing executable code, analysis results, and visualizations.
+
 ## Key Components
 
 ### NotebookManager
@@ -60,14 +62,10 @@ mcp = FastMCP(name="MyAssistantServer")
 @mcp.tool
 def print_hello():
     nbm = get_nbm()
-
-    # Get the active notebook
     jce = nbm.active_notebook
-    
     code = "print('hello')"
-    # Execute the code
     result = jce.execute(code)
-
+    return result
 
 class MyCodeModeManager(BaseMCPManager):
     def init_mcp(self):
